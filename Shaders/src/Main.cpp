@@ -25,6 +25,7 @@
 #include "Camera.h"
 #include "Text.h"
 #include "Mesh.h"
+#include "PointLight.h"
 
 #include <iostream>
 using namespace std;
@@ -42,15 +43,17 @@ char v_shader_file[] =
 //".\\shaders\\basic.vert";
 //".\\shaders\\displacement.vert"; // vertex displacement shader with perlin noise
 //".\\shaders\\perVert_lambert.vert"; // basic lambert lighting  
- ".\\shaders\\perFrag_lambert.vert"; // basic lambert lighting with per-fragment implementation
+// ".\\shaders\\perFrag_lambert.vert"; // basic lambert lighting with per-fragment implementation
 //".\\shaders\\toon_shading.vert"; // basic toon shading with per-fragment implementation
+".\\src\\testVert.vert";
 
 char f_shader_file[] =
 //".\\shaders\\basic.frag";
 // ".\\shaders\\displacement.frag"; // vertex displacement shader with perlin noise
 // ".\\shaders\\perVert_lambert.frag"; // basic lambert shading 
-".\\shaders\\perFrag_lambert.frag"; // basic lambert shading with per-fragment implementation
+//".\\shaders\\perFrag_lambert.frag"; // basic lambert shading with per-fragment implementation
 // ".\\shaders\\toon_shading.frag"; // basic toon shading with per-fragment implementation
+".\\src\\testFrag.frag";
 
 const char meshFile[128] =
 //"Mesh/sphere.obj";
@@ -60,7 +63,36 @@ const char meshFile[128] =
 
 Mesh g_mesh;
 
-vec3 g_lightPos = vec3(3, 3, -3);
+vec3 g_lightPos = vec3(3.0f, 3.0f, 10.0f);
+
+vec3 pointLightPositions[] = {
+	vec3(3.0f,3.0f,3.0f),
+	vec3(1.0f,0.0f,-2.0f)
+};
+
+vec3 diffuseValues[] = {
+	vec3(1.0f,1.0f,0.0f),
+	vec3(1.0f,0.0f,1.0f)
+};
+
+vec3 ambientValues[] = {
+	vec3(0.0f,0.15f,0.0f),
+	vec3(0.0f,0.0f,0.15f)
+};
+
+vec3 specularValues[] = {
+	vec3(1.0f,0.0f,0.0f),
+	vec3(1.0f,0.0f,0.0f)
+};
+
+int coeffValues[] = {
+	20,
+	20
+};
+
+
+PointLight pointLights[2];
+
 float g_time = 0.0f;
 
 void initialization()
@@ -70,6 +102,17 @@ void initialization()
 
 	g_mesh.create(meshFile, v_shader_file, f_shader_file);
 	// add any stuff you want to initialize ...
+	pointLights[0].position = vec3(3.0f, 3.0f, 3.0f);
+	pointLights[0].ambient = vec3(0.0f, 0.15f, 0.0f);
+	pointLights[0].specular = vec3(1.0f, 0.0f, 0.0f);
+	pointLights[0].diffuse = vec3(1.0f, 1.0f, 0.0f);
+	pointLights[0].coeff = 20;
+
+	pointLights[1].position = vec3(1.0f, 0.0f, -2.0f);
+	pointLights[1].ambient = vec3(0.0f, 0.0f, 0.15f);
+	pointLights[1].specular = vec3(1.0f, 0.0f, 0.0f);
+	pointLights[1].diffuse = vec3(1.0f, 0.0f, 1.0f);
+	pointLights[1].coeff = 20;
 }
 
 /****** GL callbacks ******/
@@ -128,9 +171,16 @@ void display()
 	str = "triangle count: " + std::to_string(g_mesh.tri_num);
 	g_text.draw(10, 60, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
 
-
+	
 	g_time = (float)glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-	g_mesh.draw(g_cam.viewMat, g_cam.projMat, g_lightPos, g_time);
+	//g_mesh.draw(g_cam.viewMat, g_cam.projMat, g_lightPos, g_time);
+	g_mesh.draw(g_cam.viewMat, g_cam.projMat, pointLightPositions,ambientValues,diffuseValues,specularValues,coeffValues, g_time, vec3(0.0, 2.0, 0.0), vec3(0.5, 0.5, 0.5), vec3(g_cam.eye.x, g_cam.eye.y, g_cam.eye.z));
+	g_mesh.draw(g_cam.viewMat, g_cam.projMat, pointLightPositions, ambientValues, diffuseValues, specularValues, coeffValues, g_time, vec3(0.0, 2.0, 0.0), vec3(0.5, 0.5, 0.5), vec3(g_cam.eye.x, g_cam.eye.y, g_cam.eye.z));
+	
+	/*glPushMatrix();
+	glTranslatef(10.0f, 10.0f, 10.0f);
+	glutSolidSphere(2, 50, 50);
+	glPopMatrix();*/
 
 	glutSwapBuffers();
 }
@@ -183,6 +233,15 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case'-':
 		g_mesh.normal_offset -= 0.01;
+		break;
+	case 'w':
+		//g_lightPos += vec3(0.0, 0.0, 1);
+		//std::cout << g_lightPos.z << endl;
+		break;
+	case 's':
+		//g_lightPos -= vec3(0.0, 0.0, 1);
+		//std::cout << g_lightPos.z << endl;
+		break;
 	}
 }
 

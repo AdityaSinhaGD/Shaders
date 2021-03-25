@@ -174,7 +174,7 @@ void Mesh::create(const char* filename, const char* v_shader_file, const char* f
 	prepareVBOandShaders(v_shader_file, f_shader_file);
 }
 
-void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 lightPos, float time) {
+void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 lightPositions[],vec3 ambientValues[],vec3 diffuseValues[],vec3 specularValues[],int coeffValues[], float time, vec3 translation, vec3 scaleVal, vec3 eyePos) {
 
 	glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -193,12 +193,27 @@ void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 lightPos, float time) {
 
 
 	glUseProgram(shaderProg.id);
-	mat4 m = translate(mat4(1.0), vec3(0.0f, 2.0f, 0.0f));
-	modelMat = scale(m, vec3(0.3f, 0.3f, 0.3f));
+	mat4 m = translate(mat4(1.0), translation);
+	modelMat = scale(m, scaleVal);
 	shaderProg.setMatrix4fv("modelMat", 1, value_ptr(modelMat));
 	shaderProg.setMatrix4fv("viewMat", 1, value_ptr(viewMat));
 	shaderProg.setMatrix4fv("projMat", 1, value_ptr(projMat));
-	shaderProg.setFloat3V("lightPos", 1, value_ptr(lightPos));
+	shaderProg.setFloat3V("pointLights[0].position", 1, value_ptr(lightPositions[0]));
+	shaderProg.setFloat3V("pointLights[1].position", 1, value_ptr(lightPositions[1]));
+
+	shaderProg.setFloat3V("pointLights[0].ambient", 1, value_ptr(ambientValues[0]));
+	shaderProg.setFloat3V("pointLights[1].ambient", 1, value_ptr(ambientValues[1]));
+
+	shaderProg.setFloat3V("pointLights[0].diffuse", 1, value_ptr(diffuseValues[0]));
+	shaderProg.setFloat3V("pointLights[1].diffuse", 1, value_ptr(diffuseValues[1]));
+
+	shaderProg.setFloat3V("pointLights[0].specular", 1, value_ptr(specularValues[0]));
+	shaderProg.setFloat3V("pointLights[1].specular", 1, value_ptr(specularValues[1]));
+
+	shaderProg.setInt("pointLights[0].coeff", coeffValues[0]);
+	shaderProg.setInt("pointLights[1].coeff", coeffValues[1]);
+
+	shaderProg.setFloat3V("eyePos", 1, value_ptr(eyePos));
 	shaderProg.setFloat("time", time);
 	shaderProg.setFloat("offset", normal_offset);
 
