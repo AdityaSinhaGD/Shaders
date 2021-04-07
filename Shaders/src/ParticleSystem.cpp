@@ -189,17 +189,20 @@ void ParticleSystem::create(unsigned int num_of_particles, vec3 min_point, vec3 
 	glEnableVertexAttribArray(1);
 }
 
-void ParticleSystem::create(int no_of_particles_row, int no_of_particles_column, vec3 min_point, vec3 max_point, const char* compute_shader_file, const char* vertex_shader_file, const char* fragment_shader_file)
+void ParticleSystem::create(int width, int height, vec3 min_point, vec3 max_point, const char* compute_shader_file, const char* vertex_shader_file, const char* fragment_shader_file)
 {
-	if (no_of_particles_row <= 0||no_of_particles_column<=0)
+	if (width <= 0||height<=0)
 	{
 		cout << "The particle system wasn't created!" << endl;
 		return;
 	}
-	num = no_of_particles_row * no_of_particles_column;
+	
+	std::cout << num << "---------------------------------------------";
 	size_min_point = min_point;
 	size_max_point = max_point;
-
+	int particles_per_row = width + 1;
+	int particles_per_column = height + 1;
+	num = particles_per_row * particles_per_column;
 	// ********** load and set up shaders and shader programs **********
 	// load the compute shader and link it to a shader program
 	cShader.create(compute_shader_file, GL_COMPUTE_SHADER);
@@ -230,20 +233,20 @@ void ParticleSystem::create(int no_of_particles_row, int no_of_particles_column,
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pos_ssbo);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, num * sizeof(vec4), NULL, GL_STATIC_DRAW); // there isn't data yet, just init memory, data will sent at run-time.
 
-	vec3** tempPosArray = new vec3 * [no_of_particles_column];
-	for (int i = 0; i < no_of_particles_column; ++i)
+	vec3** tempPosArray = new vec3 * [particles_per_row];
+	for (int i = 0; i < particles_per_row; ++i)
 	{
-		tempPosArray[i] = new vec3[no_of_particles_row];
+		tempPosArray[i] = new vec3[particles_per_column];
 	}
 
-	float rowSpacing = (max_point.x - min_point.x) / no_of_particles_row;
-	float columnSpacing = (max_point.y - min_point.y) / no_of_particles_column;
+	float rowSpacing = (size_max_point.x - size_min_point.x) / particles_per_row;
+	float columnSpacing = (size_max_point.y - size_min_point.y) / particles_per_column;
 
-	for (int x = 0; x < no_of_particles_column; x++)
+	for (int x = 0; x < particles_per_row; x++)
 	{
-		for (int y = 0; y < no_of_particles_row; y++)
+		for (int y = 0; y < particles_per_column; y++)
 		{
-			tempPosArray[x][y] = min_point + x * rowSpacing * vec3(1, 0, 0) + y * columnSpacing * vec3(0, 1, 0);
+			tempPosArray[x][y] = size_min_point + (x * rowSpacing * vec3(1, 0, 0) + y * columnSpacing * vec3(0, 1, 0));
 		}
 	}
 
@@ -260,9 +263,9 @@ void ParticleSystem::create(int no_of_particles_row, int no_of_particles_column,
 			pos_array[i].w = 1.0f;
 		}*/
 		int i = 0;
-		for (int x = 0; x < no_of_particles_column; x++)
+		for (int x = 0; x < particles_per_row; x++)
 		{
-			for (int y = 0; y < no_of_particles_row; y++)
+			for (int y = 0; y < particles_per_column; y++)
 			{
 				pos_array[i].x = tempPosArray[x][y].x;
 				pos_array[i].y = tempPosArray[x][y].y;
@@ -271,9 +274,10 @@ void ParticleSystem::create(int no_of_particles_row, int no_of_particles_column,
 				i = i + 1;
 			}
 		}
+		std::cout << i << "###########";
 	}
 
-	for (int i = 0; i < no_of_particles_column; ++i)
+	for (int i = 0; i < particles_per_column; ++i)
 	{
 		delete[] tempPosArray[i];
 	}
