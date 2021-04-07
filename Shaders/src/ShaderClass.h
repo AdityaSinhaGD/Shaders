@@ -18,6 +18,7 @@ public:
 	ShaderClass(void);
 	~ShaderClass(void);
 	void create(const char* shaderFileName, GLenum targetType);
+	void createFromContent(const char* sourceContent, GLenum targetType);
 	void destroy(); 
 
 private:

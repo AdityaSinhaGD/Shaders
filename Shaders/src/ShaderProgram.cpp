@@ -31,12 +31,44 @@ void ShaderProgram::link(ShaderClass shader)
 	}
 }
 
+
+//GLuint ShaderProgram::getAttributeLoc(const GLcharARB* name)
+//{
+//	return glGetAttribLocationARB(id, name);
+//}
+//void ShaderProgram::setAttribute4f(const GLuint loc, const float* floatPtr)
+//{
+//	if (loc != -1)
+//		glVertexAttrib4fvARB(loc, floatPtr);
+//	else
+//		cout << "can not set 4f attribute, loc id is -1 !" << endl;
+//}
+//void ShaderProgram::setAttribute4i(const GLuint loc, const int* intPtr)
+//{
+//	if (loc != -1) {
+//		glVertexAttrib4ivARB(loc, intPtr);
+//	}
+//	else
+//		cout << "can not set 4i attribute, loc id is -1 !" << endl;
+//}
+//void ShaderProgram::setAttributeMat4(const GLuint loc, const float* floatPtr)
+//{
+//	if (loc != -1) {
+//		GLuint i;
+//		for (i = loc; i < loc + 4; i++) { // set each column .. 
+//			glVertexAttrib4fARB(i, floatPtr[(i - loc) * 4 + 0], floatPtr[(i - loc) * 4 + 1], floatPtr[(i - loc) * 4 + 2], floatPtr[(i - loc) * 4 + 3]);
+//		}
+//	}
+//	//else 
+//		//cout<<"can not set matrix attribute, loc id is -1 !"<<endl;
+//}
+
+
 void ShaderProgram::setInt(const char* name, int value)
 {
 	unsigned int loc = glGetUniformLocation(id, name);
 	if (loc == -1) {
-		return;
-		//cout << "Uniform integer: " << name <<"doesn't exist."<< endl;
+		cout << "Uniform integer: " << name <<"doesn't exist."<< endl;
 	}
 	else {
 		glUniform1i(loc, value);
@@ -48,8 +80,7 @@ void ShaderProgram::setFloat(const char* name, float value)
 {
 	unsigned int loc = glGetUniformLocation(id, name);
 	if (loc == -1) {
-		return;
-		//cout << "Uniform float: " << name <<" doesn't exist."<< endl;
+		cout << "Uniform float: " << name <<" doesn't exist."<< endl;
 	}
 	else {
 		glUniform1f(loc, value);
@@ -59,8 +90,7 @@ void ShaderProgram::setFloat1V(const char* name, unsigned int count, const float
 {
 	unsigned int loc = glGetUniformLocation(id, name);
 	if (loc == -1) {
-		return;
-		//cout << "Uniform float1 vector: " << name << " doesn't exist."<<endl;
+		cout << "Uniform float1 vector: " << name << " doesn't exist."<<endl;
 	}
 	else {
 		glUniform1fv(loc, count, floatPtr);
@@ -71,8 +101,7 @@ void ShaderProgram::setFloat3V(const char* name, unsigned int count, const float
 {
 	unsigned int loc = glGetUniformLocation(id, name);
 	if (loc == -1) {
-		return;
-		//cout << "Uniform float3 vector: " << name << " doesn't exist." << endl;
+		cout << "Uniform float3 vector: " << name << " doesn't exist." << endl;
 	}
 	else {
 		glUniform3fv(loc, count, floatPtr);
@@ -83,8 +112,7 @@ void ShaderProgram::setMatrix4fv(const char* name, unsigned int count, const flo
 {
 	unsigned int loc = glGetUniformLocation(id, name);
 	if (loc == -1) {
-		return;
-		//cout << "Uniform matrix: " << name << " doesn't exist."<<endl;
+		cout << "Uniform matrix: " << name << " doesn't exist."<<endl;
 	}
 	else {
 		glUniformMatrix4fv(loc, count, GL_FALSE, floatPtr);

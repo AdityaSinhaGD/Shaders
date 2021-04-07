@@ -21,6 +21,7 @@ void ShaderClass::create(const char* shaderFileName, GLenum targetType)
 		cout<<"No GLSL support\n";
 		exit(1);
 	}
+	id = glCreateProgram();
 	char* source = NULL;
 	int status;
 	if (shaderFileName)
@@ -58,11 +59,33 @@ void ShaderClass::create(const char* shaderFileName, GLenum targetType)
 	//glDeleteShader(cShader);
 }
 
+void ShaderClass::createFromContent(const char* sourceContent, GLenum targetType)
+{
+	if (sourceContent == NULL)
+	{
+		cout << "The shader isn't created!" << endl;
+		return;
+	}
+
+	int status;
+	id = glCreateShader(targetType);
+	glShaderSource(id, 1, &sourceContent, NULL);
+	glCompileShader(id);
+
+	glGetShaderiv(id, GL_COMPILE_STATUS, &status);
+	if (status != GL_TRUE)
+	{
+		cout << "Error: The shader is created but incorrect, see the shader info log below!" << endl;
+		printShaderInfoLog(id);
+	}
+}
+
 // delete the shader after it's linked into a sahder program id, as it's no longer needed
 void ShaderClass::destroy() 
 {
 	glDeleteShader(id);
 }
+
 
 char* ShaderClass::loadShaderFile(const char* fn)
 {
@@ -105,6 +128,32 @@ char* ShaderClass::loadShaderFile(const char* fn)
 	content[i-1] = '\0';
 	file.close();
 	return content;
+
+/*
+	if (fn != NULL) {
+		fp = fopen_s(fn, "rt");
+
+		if (fp != NULL) {
+
+			fseek(fp, 0, SEEK_END);
+			count = ftell(fp);
+			rewind(fp);
+
+			if (count > 0) {
+				content = (char*)malloc(sizeof(char) * (count + 1));
+				count = fread(content, sizeof(char), count, fp);
+				content[count] = '\0';
+			}
+			fclose(fp);
+		}
+		else {
+			cout << fn << "does not exsit !" << endl;
+		}
+	}
+	else {
+		cout << "file name is null !" << endl;
+	}*/
+	//return content;
 }
 
 void ShaderClass::printShaderInfoLog(unsigned int shader_id)

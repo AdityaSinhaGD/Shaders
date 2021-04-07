@@ -21,21 +21,18 @@
     <ClCompile Include="src\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ShaderClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ShaderClass.h">
@@ -47,22 +44,8 @@
     <ClInclude Include="src\Text.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PointLight.h">
+    <ClInclude Include="src\ParticleSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\perVert_lambert.frag" />
-    <None Include="shaders\perFrag_lambert.vert" />
-    <None Include="shaders\basic.frag" />
-    <None Include="shaders\basic.vert" />
-    <None Include="shaders\displacement.frag" />
-    <None Include="shaders\displacement.vert" />
-    <None Include="shaders\perFrag_lambert.frag" />
-    <None Include="shaders\toon_shading.frag" />
-    <None Include="shaders\toon_shading.vert" />
-    <None Include="shaders\perVert_lambert.vert" />
-    <None Include="src\testFrag.frag" />
-    <None Include="src\testVert.vert" />
   </ItemGroup>
 </Project>

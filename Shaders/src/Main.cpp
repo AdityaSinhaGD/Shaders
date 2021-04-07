@@ -1,15 +1,3 @@
-// This OpenGL project demonstrates a simple interactive camera implementation and a few vertex and fragment shaders. 
-// Two modes of camera controls (press c to switch between two modes): 
-// 1. Focus Mode: Holding ALT and Left Mouse Button (LMB) and moving the mouse will rotate the camera about the LookAt Position
-//                Holding ALT and MMB and moving the mouse will pan the camera.
-//                Holding ALT and RMB and moving the mouse will zoom the camera.
-// 2. First-Person Mode: Pressing W, A, S, or D will move the camera
-//                       Holding LMB and moving the mouse will roate the camera.
-// Basic shader - demonstrate the basic use of vertex and fragment shader
-// Displacement shader - a special fireball visual effects with Perlin noise function
-// Toon shading shader - catoonish rendering effects
-// Per-vertex shading v.s. per-fragment shading = visual comparison between two types of shading 
-
 #include <GL/glew.h>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -24,8 +12,7 @@
 
 #include "Camera.h"
 #include "Text.h"
-#include "Mesh.h"
-#include "PointLight.h"
+#include "ParticleSystem.h"
 
 #include <iostream>
 using namespace std;
@@ -39,80 +26,25 @@ Text g_text;
 
 unsigned char g_keyStates[256];
 
-char v_shader_file[] =
-//".\\shaders\\basic.vert";
-//".\\shaders\\displacement.vert"; // vertex displacement shader with perlin noise
-//".\\shaders\\perVert_lambert.vert"; // basic lambert lighting  
-// ".\\shaders\\perFrag_lambert.vert"; // basic lambert lighting with per-fragment implementation
-//".\\shaders\\toon_shading.vert"; // basic toon shading with per-fragment implementation
-".\\src\\testVert.vert";
+unsigned int curTime = 0; //the milliseconds since the start
+unsigned int preTime = 0;
+ParticleSystem parSys;
 
-char f_shader_file[] =
-//".\\shaders\\basic.frag";
-// ".\\shaders\\displacement.frag"; // vertex displacement shader with perlin noise
-// ".\\shaders\\perVert_lambert.frag"; // basic lambert shading 
-//".\\shaders\\perFrag_lambert.frag"; // basic lambert shading with per-fragment implementation
-// ".\\shaders\\toon_shading.frag"; // basic toon shading with per-fragment implementation
-".\\src\\testFrag.frag";
-
-const char meshFile[128] =
-//"Mesh/sphere.obj";
-//"Mesh/bunny2K.obj";
-"Mesh/teapot.obj";
-//"Mesh/teddy.obj";
-
-Mesh g_mesh;
-
-vec3 g_lightPos = vec3(3.0f, 3.0f, 10.0f);
-
-vec3 pointLightPositions[] = {
-	vec3(3.0f,3.0f,3.0f),
-	vec3(1.0f,0.0f,-2.0f)
-};
-
-vec3 diffuseValues[] = {
-	vec3(1.0f,1.0f,0.0f),
-	vec3(1.0f,0.0f,1.0f)
-};
-
-vec3 ambientValues[] = {
-	vec3(0.0f,0.15f,0.0f),
-	vec3(0.0f,0.0f,0.15f)
-};
-
-vec3 specularValues[] = {
-	vec3(1.0f,0.0f,0.0f),
-	vec3(1.0f,0.0f,0.0f)
-};
-
-int coeffValues[] = {
-	20,
-	20
-};
-
-
-PointLight pointLights[2];
-
-float g_time = 0.0f;
+char v_shader_file[] = ".\\shaders\\v_shader.vert";
+char f_shader_file[] = ".\\shaders\\f_shader.frag";
+char c_shader_file[] = ".\\shaders\\c_shader.comp";
 
 void initialization()
 {
-	g_cam.set(1.0f, 2.0f, 4.0f, 0.0f, 1.0f, -0.5f, g_winWidth, g_winHeight);
+	/*parSys.create(20, vec3(-10.0f, -10.0f, -10.0f), vec3(10.0f, 10.0f, 10.0f),
+		c_shader_file, v_shader_file, f_shader_file);*/
+
+	parSys.create(64, 32, vec3(-10.0f, 0.0f, -5.0f), vec3(10.0f, 10.0f, -5.0f), c_shader_file, v_shader_file, f_shader_file);
+
+	g_cam.set(38.0f, 13.0f, 4.0f, 0.0f, 0.0f, 0.0f, g_winWidth, g_winHeight, 45.0f, 0.01f, 10000.0f);
 	g_text.setColor(0.0f, 0.0f, 0.0f);
 
-	g_mesh.create(meshFile, v_shader_file, f_shader_file);
 	// add any stuff you want to initialize ...
-	pointLights[0].position = vec3(3.0f, 3.0f, 3.0f);
-	pointLights[0].ambient = vec3(0.0f, 0.15f, 0.0f);
-	pointLights[0].specular = vec3(1.0f, 0.0f, 0.0f);
-	pointLights[0].diffuse = vec3(1.0f, 1.0f, 0.0f);
-	pointLights[0].coeff = 20;
-
-	pointLights[1].position = vec3(1.0f, 0.0f, -2.0f);
-	pointLights[1].ambient = vec3(0.0f, 0.0f, 0.15f);
-	pointLights[1].specular = vec3(1.0f, 0.0f, 0.0f);
-	pointLights[1].diffuse = vec3(1.0f, 0.0f, 1.0f);
-	pointLights[1].coeff = 20;
 }
 
 /****** GL callbacks ******/
@@ -133,10 +65,15 @@ void initialGL()
 void idle()
 {
 	// add any stuff to update at runtime ....
+	curTime = glutGet(GLUT_ELAPSED_TIME);
+	float deltaT = (float)(curTime - preTime) / 1000.0f; // in seconds
+	parSys.update(deltaT);
 
 	g_cam.keyOperation(g_keyStates, g_winWidth, g_winHeight);
 
 	glutPostRedisplay();
+
+	preTime = curTime;
 }
 
 void display()
@@ -144,44 +81,27 @@ void display()
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// add any stuff you'd like to draw	
 
 	glUseProgram(0);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
+	parSys.draw(15.0f, g_cam.viewMat, g_cam.projMat);
 
 	g_cam.drawGrid();
 	g_cam.drawCoordinateOnScreen(g_winWidth, g_winHeight);
 	g_cam.drawCoordinate();
 
 	// display the text
-	string str;
-	if (g_cam.isFocusMode())
-	{
-		str = "Cam mode: Focus";
+	if (g_cam.isFocusMode()) {
+		string str = "Cam mode: Focus";
 		g_text.draw(10, 30, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
 	}
-	else if (g_cam.isFPMode())
-	{
-		str = "Cam mode: FP";
+	else if (g_cam.isFPMode()) {
+		string str = "Cam mode: FP";
 		g_text.draw(10, 30, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
 	}
-	str = "vertex count: " + std::to_string(g_mesh.vert_num);
-	g_text.draw(10, 45, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
-	str = "triangle count: " + std::to_string(g_mesh.tri_num);
-	g_text.draw(10, 60, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
 
-	
-	g_time = (float)glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-	//g_mesh.draw(g_cam.viewMat, g_cam.projMat, g_lightPos, g_time);
-	g_mesh.draw(g_cam.viewMat, g_cam.projMat, pointLightPositions,ambientValues,diffuseValues,specularValues,coeffValues, g_time, vec3(0.0, 2.0, 0.0), vec3(0.5, 0.5, 0.5), vec3(g_cam.eye.x, g_cam.eye.y, g_cam.eye.z));
-	g_mesh.draw(g_cam.viewMat, g_cam.projMat, pointLightPositions, ambientValues, diffuseValues, specularValues, coeffValues, g_time, vec3(0.0, 2.0, 0.0), vec3(0.5, 0.5, 0.5), vec3(g_cam.eye.x, g_cam.eye.y, g_cam.eye.z));
-	
-	/*glPushMatrix();
-	glTranslatef(10.0f, 10.0f, 10.0f);
-	glutSolidSphere(2, 50, 50);
-	glPopMatrix();*/
-
+	glPopMatrix();
 	glutSwapBuffers();
 }
 
@@ -189,12 +109,11 @@ void reshape(int w, int h)
 {
 	g_winWidth = w;
 	g_winHeight = h;
-	if (h == 0)
-	{
+	if (h == 0) {
 		h = 1;
 	}
 	g_cam.setProjectionMatrix(g_winWidth, g_winHeight);
-	g_cam.setViewMatrix();
+	g_cam.setViewMatrix(); 
 	glViewport(0, 0, w, h);
 }
 
@@ -216,8 +135,7 @@ void keyup(unsigned char key, int x, int y)
 void keyboard(unsigned char key, int x, int y)
 {
 	g_keyStates[key] = true;
-	switch (key)
-	{
+	switch (key) {
 	case 27:
 		exit(0);
 		break;
@@ -228,20 +146,6 @@ void keyboard(unsigned char key, int x, int y)
 	case ' ':
 		g_cam.PrintProperty();
 		break;
-	case '+':
-		g_mesh.normal_offset += 0.01;
-		break;
-	case'-':
-		g_mesh.normal_offset -= 0.01;
-		break;
-	case 'w':
-		//g_lightPos += vec3(0.0, 0.0, 1);
-		//std::cout << g_lightPos.z << endl;
-		break;
-	case 's':
-		//g_lightPos -= vec3(0.0, 0.0, 1);
-		//std::cout << g_lightPos.z << endl;
-		break;
 	}
 }
 
@@ -251,7 +155,7 @@ int main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(g_winWidth, g_winHeight);
 	glutInitWindowPosition(0, 0);
-	glutCreateWindow("VertFrag Shader Example");
+	glutCreateWindow("Compute Shader Example: A Simple particle System");
 
 	glewInit();
 	initialGL();
