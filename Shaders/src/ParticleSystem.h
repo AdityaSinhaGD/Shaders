@@ -59,6 +59,6 @@ public:
 	void create(int width,int height, vec3 min_point, vec3 max_point,
 		const char* compute_shader_file, const char* vertex_shader_file, const char* fragment_shader_file);
 	void update(float delta_time);  // invoke the compute shader in the update ()
-	void update(glm::vec3(rayOrigin), glm::vec3(spherePosition), float sphereRadius);
+	void update(vec3 rOrigin, vec3 spherePos, float radius);
 	void draw(float particle_size, mat4 view_mat, mat4 proj_mat);    // invoke the vert and frag shaders in the draw ()
 };

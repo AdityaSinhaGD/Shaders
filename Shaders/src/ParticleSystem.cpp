@@ -295,9 +295,9 @@ void ParticleSystem::create(int width, int height, vec3 min_point, vec3 max_poin
 	{
 		for (unsigned int i = 0; i < num; i++)
 		{
-			color_array[i].r = randomf(0.0f, 1.0f);
-			color_array[i].g = randomf(0.0f, 1.0f);
-			color_array[i].b = randomf(0.0f, 1.0f);
+			color_array[i].r = 0.0f;
+			color_array[i].g = 0.0f;
+			color_array[i].b = 0.5f;
 			color_array[i].a = 1.0f;
 		}
 	}
@@ -340,13 +340,13 @@ void ParticleSystem::update(float delta_time)
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-void ParticleSystem::update(glm::vec3 rayOrigin, glm::vec3 spherePosition, float sphereRadius)
+void ParticleSystem::update(vec3 rOrigin, vec3 spherePos, float radius)
 {
-	// invoke the compute shader to update the status of particles 
+	//invoke the compute shader to update the status of particles
 	glUseProgram(cShaderProg.id);
-	cShaderProg.setFloat3V("rayOrigin",1, glm::value_ptr(rayOrigin));
-	cShaderProg.setFloat3V("spherePosition", 1, glm::value_ptr(spherePosition));
-	cShaderProg.setFloat("sphereRadius", sphereRadius);
+	cShaderProg.setFloat3V("rayOrigin", 1, glm::value_ptr(rOrigin));
+	cShaderProg.setFloat3V("spherePosition", 1, glm::value_ptr(spherePos));
+	cShaderProg.setFloat("sphereRadius", radius);
 	cShaderProg.setFloat3V("minPos", 1, glm::value_ptr(size_min_point));
 	cShaderProg.setFloat3V("maxPos", 1, glm::value_ptr(size_max_point));
 	glDispatchCompute((num + 128 - 1) / 128, 1, 1); // one-dimentional GPU threading config, 128 threads per froup 

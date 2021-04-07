@@ -32,7 +32,7 @@ ParticleSystem parSys;
 
 char v_shader_file[] = ".\\shaders\\v_shader.vert";
 char f_shader_file[] = ".\\shaders\\f_shader.frag";
-char c_shader_file[] = ".\\shaders\\c_shader.comp";
+char c_shader_file[] = ".\\shaders\\c_rayshader.comp";
 
 void initialization()
 {
@@ -67,8 +67,8 @@ void idle()
 	// add any stuff to update at runtime ....
 	curTime = glutGet(GLUT_ELAPSED_TIME);
 	float deltaT = (float)(curTime - preTime) / 1000.0f; // in seconds
-	parSys.update(deltaT);
-	//parSys.update(vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 0.2f);
+	//parSys.update(deltaT);
+	parSys.update(vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 0.2f);
 	g_cam.keyOperation(g_keyStates, g_winWidth, g_winHeight);
 
 	glutPostRedisplay();

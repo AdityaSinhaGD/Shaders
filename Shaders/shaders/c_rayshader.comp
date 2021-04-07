@@ -1,4 +1,4 @@
-#version 430 
+#version 430 compatibility
 
 uniform vec3 rayOrigin;
 uniform vec3 spherePosition;
@@ -23,5 +23,12 @@ void main()
 
 	uint g_id = gl_GlobalInvocationID.x;
 	vec3 pos = Positions[g_id].xyz;
+
+	if(rayOrigin.x == minPos.x||spherePosition.x > sphereRaidus || maxPos.x > 20.0f)
+	{
+		Colors[g_id].xyz = vec3(0.0,0.0,0.0);
+	}
+
+
 	Positions[g_id].xyz = pos;
 }
