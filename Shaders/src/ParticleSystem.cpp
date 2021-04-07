@@ -340,6 +340,19 @@ void ParticleSystem::update(float delta_time)
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
+void ParticleSystem::update(glm::vec3 rayOrigin, glm::vec3 spherePosition, float sphereRadius)
+{
+	// invoke the compute shader to update the status of particles 
+	glUseProgram(cShaderProg.id);
+	cShaderProg.setFloat3V("rayOrigin",1, glm::value_ptr(rayOrigin));
+	cShaderProg.setFloat3V("spherePosition", 1, glm::value_ptr(spherePosition));
+	cShaderProg.setFloat("sphereRadius", sphereRadius);
+	cShaderProg.setFloat3V("minPos", 1, glm::value_ptr(size_min_point));
+	cShaderProg.setFloat3V("maxPos", 1, glm::value_ptr(size_max_point));
+	glDispatchCompute((num + 128 - 1) / 128, 1, 1); // one-dimentional GPU threading config, 128 threads per froup 
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+
 void ParticleSystem::draw(float particle_size, mat4 view_mat, mat4 proj_mat)
 {
 	glUseProgram(vfShaderProg.id);
